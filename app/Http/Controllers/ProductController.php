@@ -2,12 +2,13 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Product;
+use App\Models\VehicleRegistration;
 use Illuminate\Http\Request;
 
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Storage;
 use Carbon\Carbon;
+use GuzzleHttp\Client;
 
 class ProductController extends Controller
 {
@@ -18,7 +19,7 @@ class ProductController extends Controller
      */
     public function index()
     {
-        return Product::select('id','title','description','image')->get();
+        return VehicleRegistration::select('id','ownerIdentityNumber','ownerDateOfBirthHijri','ownerDateOfBirthGregorian','sequenceNumber','plateLetterRight','plateLetterMiddle','plateLetterLeft','plateNumber','plateType')->get();
     }
 
     /**
@@ -30,23 +31,70 @@ class ProductController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'title'=>'required',
-            'description'=>'required',
-            'image'=>'required|image'
+            'owneridnum'=>'required',
+            'ownerdateofbirthhijri'=>'required',
+            'ownerdateofbirthgregorian'=>'required',
+            'sequencenumber'=>'required',
+            'plateletterright'=>'required',
+            'platelettermiddle'=>'required',
+            'plateletterleft'=>'required',
+            'platenumbr'=>'required',
+            'platetype'=>'required'
         ]);
-
+        // echo json_encode($request->all()); die;
         try{
-            $imageName = Str::random().'.'.$request->image->getClientOriginalExtension();
-            Storage::disk('public')->putFileAs('product/image', $request->image,$imageName);
-            Product::create($request->post()+['image'=>$imageName]);
+            // $client = new Client();
+            // $url = "https://wasl.api.elm.sa/api/eRental/v1/vehicles";
+            // $params = [
+            //     'ownerIdentityNumber' => $request->owneridnum,
+            //     'ownerDateOfBirthHijri' => $request->ownerdateofbirthhijri,
+            //     'ownerDateOfBirthGregorian' => $request->ownerdateofbirthgregorian,
+            //     'sequenceNumber' => $request->sequencenumber,
+            //     'plateLetterRight' => $request->plateletterright,
+            //     'plateLetterMiddle' => $request->platelettermiddle,
+            //     'plateLetterLeft' => $request->plateletterleft,
+            //     'plateNumber' => $request->platenumbr, 
+            //     'plateType' => $request->platetype,
+            // ];
+            // $headers = [
+            //     // 'api-key' => 'k3Hy5qr73QhXrmHLXhpEh6CQ'
+            //     'Content-Type'=> 'application/json',
+            //     'client-id'=> '4F43AF3C-0C94-4C8B-8049-BCEBC3747D3B',
+            //     'app-id'=> 'b77ea16e',
+            //     'app-key'=> '2b94187f6be2657bf400f8e6403f7289'
+            // ];
+    
+            // $response = $client->request('POST', $url, [
+            //     'json' => $params,
+            //     'headers' => $headers,
+            //     'verify'  => false,
+            // ]);
+    
+            // $responseBody = json_decode($response->getBody());
+           
+
+            VehicleRegistration::create([
+                'ownerIdentityNumber' => $request->owneridnum,
+                'ownerDateOfBirthHijri' => $request->ownerdateofbirthhijri,
+                'ownerDateOfBirthGregorian' => $request->ownerdateofbirthgregorian,
+                'sequenceNumber' => $request->sequencenumber,
+                'plateLetterRight' => $request->plateletterright,
+                'plateLetterMiddle' => $request->platelettermiddle,
+                'plateLetterLeft' => $request->plateletterleft,
+                'plateNumber' => $request->platenumbr,
+                'plateType' => $request->platetype,
+            ]);
+               
 
             return response()->json([
-                'message'=>'Product Created Successfully!!'
+                'sucess'=> true,
+                "resultCode" =>"sucess"
             ]);
+            // return view('projects.apiwithkey', compact('responseBody'));
         }catch(\Exception $e){
             \Log::error($e->getMessage());
             return response()->json([
-                'message'=>'Something goes wrong while creating a product!!'
+                'message'=>'INVALID'
             ],500);
         }
     }
@@ -57,7 +105,7 @@ class ProductController extends Controller
      * @param  \App\Models\Product  $product
      * @return \Illuminate\Http\Response
      */
-    public function show(Product $product)
+    public function show(VehicleRegistration $product)
     {
         return response()->json([
             'product'=>$product
@@ -71,42 +119,35 @@ class ProductController extends Controller
      * @param  \App\Models\Product  $product
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, Product $product)
+    public function update(Request $request, VehicleRegistration $product)
     {
-        $request->validate([
-            'title'=>'required',
-            'description'=>'required',
-            'image'=>'nullable'
-        ]);
 
         try{
+            $id = $request->input('id');
+            VehicleRegistration::where('id', $id)
+                ->update([
+                    'ownerIdentityNumber' => $request->owneridnum,
+                    'ownerDateOfBirthHijri' => $request->ownerdateofbirthhijri,
+                    'ownerDateOfBirthGregorian' => $request->ownerdateofbirthgregorian,
+                    'sequenceNumber' => $request->sequencenumber,
+                    'plateLetterRight' => $request->plateletterright,
+                    'plateLetterMiddle' => $request->platelettermiddle,
+                    'plateLetterLeft' => $request->plateletterleft,
+                    'plateNumber' => $request->platenumbr,
+                    'plateType' => $request->platetype,
+                ]
+                );
 
-            $product->fill($request->post())->update();
-
-            if($request->hasFile('image')){
-
-                // remove old image
-                if($product->image){
-                    $exists = Storage::disk('public')->exists("product/image/{$product->image}");
-                    if($exists){
-                        Storage::disk('public')->delete("product/image/{$product->image}");
-                    }
-                }
-
-                $imageName = Str::random().'.'.$request->image->getClientOriginalExtension();
-                Storage::disk('public')->putFileAs('product/image', $request->image,$imageName);
-                $product->image = $imageName;
-                $product->save();
-            }
+           
 
             return response()->json([
-                'message'=>'Product Updated Successfully!!'
+                'message'=>'Updated Successfully!!'
             ]);
 
         }catch(\Exception $e){
             \Log::error($e->getMessage());
             return response()->json([
-                'message'=>'Something goes wrong while updating a product!!'
+                'message'=>'Something goes wrong while updating!!'
             ],500);
         }
     }
@@ -117,21 +158,21 @@ class ProductController extends Controller
      * @param  \App\Models\Product  $product
      * @return \Illuminate\Http\Response
      */
-    public function destroy(Product $product)
+    public function destroy(VehicleRegistration $product)
     {
         try {
 
-            if($product->image){
-                $exists = Storage::disk('public')->exists("product/image/{$product->image}");
-                if($exists){
-                    Storage::disk('public')->delete("product/image/{$product->image}");
-                }
-            }
+            // if($product->image){
+            //     $exists = Storage::disk('public')->exists("product/image/{$product->image}");
+            //     if($exists){
+            //         Storage::disk('public')->delete("product/image/{$product->image}");
+            //     }
+            // }
 
             $product->delete();
 
             return response()->json([
-                'message'=>'Product Deleted Successfully!!'
+                'message'=>'Deleted Successfully!!'
             ]);
             
         } catch (\Exception $e) {

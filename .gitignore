@@ -12,3 +12,6 @@ npm-debug.log
 yarn-error.log
 /.idea
 /.vscode
+/crud-react/node_modules
+/crud-react/.env
+/crud-react/build
