@@ -9,6 +9,7 @@ use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Storage;
 use Carbon\Carbon;
 use GuzzleHttp\Client;
+use Illuminate\Support\Facades\Validator;
 
 class ProductController extends Controller
 {
@@ -30,7 +31,7 @@ class ProductController extends Controller
      */
     public function store(Request $request)
     {
-        $request->validate([
+        $rules = [
             'owneridnum'=>'required',
             'ownerdateofbirthhijri'=>'required',
             'ownerdateofbirthgregorian'=>'required',
@@ -40,63 +41,73 @@ class ProductController extends Controller
             'plateletterleft'=>'required',
             'platenumbr'=>'required',
             'platetype'=>'required'
-        ]);
-        // echo json_encode($request->all()); die;
-        try{
-            // $client = new Client();
-            // $url = "https://wasl.api.elm.sa/api/eRental/v1/vehicles";
-            // $params = [
-            //     'ownerIdentityNumber' => $request->owneridnum,
-            //     'ownerDateOfBirthHijri' => $request->ownerdateofbirthhijri,
-            //     'ownerDateOfBirthGregorian' => $request->ownerdateofbirthgregorian,
-            //     'sequenceNumber' => $request->sequencenumber,
-            //     'plateLetterRight' => $request->plateletterright,
-            //     'plateLetterMiddle' => $request->platelettermiddle,
-            //     'plateLetterLeft' => $request->plateletterleft,
-            //     'plateNumber' => $request->platenumbr, 
-            //     'plateType' => $request->platetype,
-            // ];
-            // $headers = [
-            //     // 'api-key' => 'k3Hy5qr73QhXrmHLXhpEh6CQ'
-            //     'Content-Type'=> 'application/json',
-            //     'client-id'=> '4F43AF3C-0C94-4C8B-8049-BCEBC3747D3B',
-            //     'app-id'=> 'b77ea16e',
-            //     'app-key'=> '2b94187f6be2657bf400f8e6403f7289'
-            // ];
-    
-            // $response = $client->request('POST', $url, [
-            //     'json' => $params,
-            //     'headers' => $headers,
-            //     'verify'  => false,
-            // ]);
-    
-            // $responseBody = json_decode($response->getBody());
-           
-
-            VehicleRegistration::create([
-                'ownerIdentityNumber' => $request->owneridnum,
-                'ownerDateOfBirthHijri' => $request->ownerdateofbirthhijri,
-                'ownerDateOfBirthGregorian' => $request->ownerdateofbirthgregorian,
-                'sequenceNumber' => $request->sequencenumber,
-                'plateLetterRight' => $request->plateletterright,
-                'plateLetterMiddle' => $request->platelettermiddle,
-                'plateLetterLeft' => $request->plateletterleft,
-                'plateNumber' => $request->platenumbr,
-                'plateType' => $request->platetype,
-            ]);
+		];
+		$validator = Validator::make($request->all(),$rules);
+		if ($validator->fails()) {
+            return response()->json([
+                'message'=>'Input erro'
+            ],500);;
+		}
+		else{
+            try{
+                // $client = new Client();
+                // $url = "https://wasl.api.elm.sa/api/eRental/v1/vehicles";
+                // $params = [
+                //     'ownerIdentityNumber' => $request->owneridnum,
+                //     'ownerDateOfBirthHijri' => $request->ownerdateofbirthhijri,
+                //     'ownerDateOfBirthGregorian' => $request->ownerdateofbirthgregorian,
+                //     'sequenceNumber' => $request->sequencenumber,
+                //     'plateLetterRight' => $request->plateletterright,
+                //     'plateLetterMiddle' => $request->platelettermiddle,
+                //     'plateLetterLeft' => $request->plateletterleft,
+                //     'plateNumber' => $request->platenumbr, 
+                //     'plateType' => $request->platetype,
+                // ];
+                // $headers = [
+                //     // 'api-key' => 'k3Hy5qr73QhXrmHLXhpEh6CQ'
+                //     'Content-Type'=> 'application/json',
+                //     'client-id'=> '4F43AF3C-0C94-4C8B-8049-BCEBC3747D3B',
+                //     'app-id'=> 'b77ea16e',
+                //     'app-key'=> '2b94187f6be2657bf400f8e6403f7289'
+                // ];
+        
+                // $response = $client->request('POST', $url, [
+                //     'json' => $params,
+                //     'headers' => $headers,
+                //     'verify'  => false,
+                // ]);
+        
+                // $responseBody = json_decode($response->getBody());
                
-
-            return response()->json([
-                'sucess'=> true,
-                "resultCode" =>"sucess"
-            ]);
-            // return view('projects.apiwithkey', compact('responseBody'));
-        }catch(\Exception $e){
-            \Log::error($e->getMessage());
-            return response()->json([
-                'message'=>'INVALID'
-            ],500);
+    
+                VehicleRegistration::create([
+                    'ownerIdentityNumber' => $request->owneridnum,
+                    'ownerDateOfBirthHijri' => $request->ownerdateofbirthhijri,
+                    'ownerDateOfBirthGregorian' => $request->ownerdateofbirthgregorian,
+                    'sequenceNumber' => $request->sequencenumber,
+                    'plateLetterRight' => $request->plateletterright,
+                    'plateLetterMiddle' => $request->platelettermiddle,
+                    'plateLetterLeft' => $request->plateletterleft,
+                    'plateNumber' => $request->platenumbr,
+                    'plateType' => $request->platetype,
+                ]);
+                   
+    
+                return response()->json([
+                    'message' => "VALID",
+                    'sucess'=> true,
+                    "resultCode" =>"sucess"
+                ]);
+                // return view('projects.apiwithkey', compact('responseBody'));
+            }catch(\Exception $e){
+                \Log::error($e->getMessage());
+                return response()->json([
+                    'message'=>'INVALID'
+                ],500);
+            }
         }
+        // echo json_encode($request->all()); die;
+       
     }
 
     /**
