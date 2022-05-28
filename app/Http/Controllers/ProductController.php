@@ -79,7 +79,7 @@ class ProductController extends Controller
         
                 // $responseBody = json_decode($response->getBody());
                
-    
+
                 VehicleRegistration::create([
                     'ownerIdentityNumber' => $request->owneridnum,
                     'ownerDateOfBirthHijri' => $request->ownerdateofbirthhijri,
@@ -191,6 +191,43 @@ class ProductController extends Controller
             return response()->json([
                 'message'=>'Something goes wrong while deleting a product!!'
             ]);
+        }
+    }
+
+    public function Inquiry(Request $request) {
+        try{
+            // $client = new Client();
+            // $url = "https://wasl.api.elm.sa/api/eRental/v1/inquiry/vehicles";
+            // $params = [
+            //     'sequenceNumber' => $request->sequencenumber,
+            //     'plateNumber' => $request->platenumbr, 
+            // ];
+            // $headers = [
+            //     // 'api-key' => 'k3Hy5qr73QhXrmHLXhpEh6CQ'
+            //     'Content-Type'=> 'application/json',
+            //     'client-id'=> '4F43AF3C-0C94-4C8B-8049-BCEBC3747D3B',
+            //     'app-id'=> 'b77ea16e',
+            //     'app-key'=> '2b94187f6be2657bf400f8e6403f7289'
+            // ];
+    
+            // $response = $client->request('GET', $url, [
+            //     'json' => $params,
+            //     'headers' => $headers,
+            //     // 'verify'  => false,
+            // ]);
+    
+            // $responseBody = json_decode($response->getBody());
+            return response()->json([
+                'message' => "VALID",
+                'success'=> "true",
+                "resultCode" =>"success"
+            ]);
+            // return view('projects.apiwithkey', compact('responseBody'));
+        }catch(\Exception $e){
+            \Log::error($e->getMessage());
+            return response()->json([
+                'message'=>'INVALID'
+            ],500);
         }
     }
 }
